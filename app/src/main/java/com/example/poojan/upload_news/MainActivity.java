@@ -22,14 +22,13 @@ public class MainActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase;
     news News;
     String publishdate;
-    int i=3;
+    long i;
     EditText section,date,title,trailtext,weburl,author,time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Button mPhotoPickerButton=(Button)findViewById(R.id.photovalue);
          section=(EditText)findViewById(R.id.sectionvalue);
          date=(EditText)findViewById(R.id.datevalue);
@@ -42,14 +41,22 @@ public class MainActivity extends AppCompatActivity {
         News=new news();
         firebaseDatabase=FirebaseDatabase.getInstance();
         databaseReference=firebaseDatabase.getReference("response");
+        initial();
+
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+               // increase();
+                initial();
+                Log.e("Child after Intial:----",Long.toString(i));
+                i++;
+                Log.e("Child after i++ Intial:",Long.toString(i));
                 getvalues();
-                String s=Integer.toString(i);
+                String s=Long.toString(i);
                 databaseReference.child(s).setValue(News);
                 Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_SHORT).show();
-                i++;
+
+
             }
 
         });
@@ -77,5 +84,36 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("PublishDate::------",publishdate);
 
+    }
+//    private void increase()
+//    {
+//        databaseReference.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                i=dataSnapshot.getChildrenCount();
+//                Log.e("Child:----",Long.toString(i));
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
+    private void initial()
+    {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                i=dataSnapshot.getChildrenCount();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }
