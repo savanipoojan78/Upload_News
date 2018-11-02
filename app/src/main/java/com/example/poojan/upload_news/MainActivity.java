@@ -37,24 +37,22 @@ public class MainActivity extends AppCompatActivity {
     private Uri filePath;
     news News;
     String publishdate;
+    String downloadUrl;
     FirebaseStorage storage;
     StorageReference storageReference;
     long i;
-    EditText section,date,title,trailtext,weburl,author,time;
+    EditText section, date, title, trailtext, weburl, author, time;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK
-                && data != null && data.getData() != null )
-        {
+        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
             filePath = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 //imageView.setImageBitmap(bitmap);
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -64,18 +62,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button mPhotoPickerButton=(Button)findViewById(R.id.photovalue);
-         section=(EditText)findViewById(R.id.sectionvalue);
-         date=(EditText)findViewById(R.id.datevalue);
-         title=(EditText)findViewById(R.id.titlevalue);
-         trailtext=(EditText)findViewById(R.id.trailtextvalue);
-         weburl=(EditText)findViewById(R.id.weburlvalue);
-         author=(EditText)findViewById(R.id.authorvalue);
-         time=(EditText)findViewById(R.id.timevalue);
-        Button submit=(Button)findViewById(R.id.upload);
-        News=new news();
-        firebaseDatabase=FirebaseDatabase.getInstance();
-        databaseReference=firebaseDatabase.getReference("response");
+        Button mPhotoPickerButton = (Button) findViewById(R.id.photovalue);
+        section = (EditText) findViewById(R.id.sectionvalue);
+        date = (EditText) findViewById(R.id.datevalue);
+        title = (EditText) findViewById(R.id.titlevalue);
+        trailtext = (EditText) findViewById(R.id.trailtextvalue);
+        weburl = (EditText) findViewById(R.id.weburlvalue);
+        author = (EditText) findViewById(R.id.authorvalue);
+        time = (EditText) findViewById(R.id.timevalue);
+        Button submit = (Button) findViewById(R.id.upload);
+        News = new news();
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("response");
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
         initial();
@@ -83,16 +81,14 @@ public class MainActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // increase();
-                initial();
-                uploadImage();
-//                Log.e("Calling The uploadImage",News.getThumbnail());
-               // Log.e("Child after Intial:----",Long.toString(i));
-                i++;
-                Log.e("Child after i++ Intial:",Long.toString(i));
-                getvalues();
-                String s=Long.toString(i);
-                databaseReference.child(s).setValue(News);
+                // increase();
+                uploaddata();
+                //Log.e("Calling The uploadImage", News.getThumbnail());
+                // Log.e("Child after Intial:----",Long.toString(i));
+
+               // Log.e("Child after i++ Intial:", Long.toString(i));
+                //getvalues();
+
 
                 //Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_SHORT).show();
 
@@ -110,27 +106,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private void getvalues()
-    {
-        String dateh=date.getText().toString();
-        String timeh=time.getText().toString();
-        publishdate=dateh.concat("T").concat(timeh).concat("Z");
-        News.setByLine(author.getText().toString());
-        News.setWebPublicationDate(publishdate);
-        News.setWebSectionName(section.getText().toString());
-        News.setWebTitle(title.getText().toString());
-        News.setWebTrailText(trailtext.getText().toString());
-        News.setWebUrl(weburl.getText().toString());
 
-        Log.e("PublishDate::------",publishdate);
+//    private void getvalues() {
+//        String dateh = date.getText().toString();
+//        String timeh = time.getText().toString();
+//        publishdate = dateh.concat("T").concat(timeh).concat("Z");
+//        News.setByLine(author.getText().toString());
+//        News.setWebPublicationDate(publishdate);
+//        News.setWebSectionName(section.getText().toString());
+//        News.setWebTitle(title.getText().toString());
+//        News.setWebTrailText(trailtext.getText().toString());
+//        News.setWebUrl(weburl.getText().toString());
+//        News.setThumbnail(downloadUrl);
+//       //String g=downloadUrl;
+//        //Log.e("URL::::--",g);
+//
+//       // Log.e("PublishDate::------", publishdate);
+//
+//    }
 
-    }
-    private void initial()
-    {
+    private void initial() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                i=dataSnapshot.getChildrenCount();
+                i = dataSnapshot.getChildrenCount();
 
             }
 
@@ -140,14 +139,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private void uploadImage() {
 
-        if(filePath != null)
-        {
+    private void uploaddata() {
+
+        if (filePath != null) {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
-           final StorageReference ref = storageReference.child("images/"+ UUID.randomUUID().toString());
+            final StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -157,9 +156,24 @@ public class MainActivity extends AppCompatActivity {
                             ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    String downloadUrl=uri.toString();
-                                    setthumbnail(downloadUrl);
-                                  //  Log.e("Download URI:------",News.getThumbnail());
+                                    downloadUrl = uri.toString();
+                                    initial();
+
+                                    String dateh = date.getText().toString();
+                                    String timeh = time.getText().toString();
+                                    publishdate = dateh.concat("T").concat(timeh).concat("Z");
+                                    News.setByLine(author.getText().toString());
+                                    News.setWebPublicationDate(publishdate);
+                                    News.setWebSectionName(section.getText().toString());
+                                    News.setWebTitle(title.getText().toString());
+                                    News.setWebTrailText(trailtext.getText().toString());
+                                    News.setWebUrl(weburl.getText().toString());
+                                    News.setThumbnail(downloadUrl);
+                                    String s = Long.toString(i);
+                                    databaseReference.child(s).setValue(News);
+                                    i++;
+                                    Log.e("Thumbnail:---",News.getThumbnail());
+
                                 }
                             });
                             Toast.makeText(MainActivity.this, "Data Uploaded", Toast.LENGTH_SHORT).show();
@@ -169,24 +183,18 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             progressDialog.dismiss();
-                            Toast.makeText(MainActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot
                                     .getTotalByteCount());
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
+                            progressDialog.setMessage("Uploaded " + (int) progress + "%");
                         }
                     });
         }
 
     }
-    private void setthumbnail(String s)
-    {
-        String f=s;
-
-    }
-
 }
